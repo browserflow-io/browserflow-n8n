@@ -1,19 +1,23 @@
 {
-  "name": "n8n-nodes-<...>",
-  "version": "0.1.0",
-  "description": "",
+  "name": "n8n-nodes-browserflow",
+  "version": "0.1.15",
+  "description": "Browserflow for LinkedIn is a toolkit for automating actions in LinkedIn. It allows you to automate actions like sending connection requests, sending messages, and more.",
   "keywords": [
-    "n8n-community-node-package"
+    "n8n-community-node-package",
+    "browserflow",
+    "linkedin automation",
+    "linkedin",
+    "n8n"
   ],
   "license": "MIT",
-  "homepage": "",
+  "homepage": "https://browserflow.io/n8n",
   "author": {
-    "name": "",
-    "email": ""
+    "name": "Browserflow",
+    "email": "hello@browserflow.io"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/<...>/n8n-nodes-<...>.git"
+    "url": "https://github.com/Browserflow-io/browserflow-n8n.git"
   },
   "engines": {
     "node": ">=18.10",
@@ -36,12 +40,10 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/ExampleCredentialsApi.credentials.js",
-      "dist/credentials/HttpBinApi.credentials.js"
+      "dist/credentials/BrowserflowApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/ExampleNode/ExampleNode.node.js",
-      "dist/nodes/HttpBin/HttpBin.node.js"
+      "dist/nodes/Browserflow/Browserflow.node.js"
     ]
   },
   "devDependencies": {
@@ -54,5 +56,8 @@
   },
   "peerDependencies": {
     "n8n-workflow": "*"
+  },
+  "dependencies": {
+    "sqlite3": "^5.1.7"
   }
 }
