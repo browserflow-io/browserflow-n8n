@@ -4,9 +4,12 @@
 
 The **Browserflow Node** allows you to automate LinkedIn interactions using the Browserflow API. This node provides a variety of operations to interact with LinkedIn profiles, scrape data, send connection invites, and more.
 
-You can get an API key by registering for a free 7-day trial [here](https://browserflow.io/n8n).
+You can get a free API key by registering [here](https://browserflow.io/n8n).
 
 ---
+
+[![Watch the video](https://img.youtube.com/vi/rwgCf9XJ1hM/0.jpg)](https://www.youtube.com/watch?v=rwgCf9XJ1hM)
+
 
 ## Features
 
