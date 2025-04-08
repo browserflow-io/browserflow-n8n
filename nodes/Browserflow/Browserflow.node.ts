@@ -254,6 +254,33 @@ export class Browserflow implements INodeType {
                 },
             },
             {
+                displayName: 'Search Method',
+                name: 'searchMethod',
+                type: 'options',
+                options: [
+                    {
+                        name: 'Use Filters',
+                        value: 'filters',
+                    },
+                    {
+                        name: 'Use Search URL',
+                        value: 'url',
+                    },
+                ],
+                default: 'filters',
+                description: 'Choose how to perform the LinkedIn search - Recommended to use filters unless you need complex search criteria',
+                displayOptions: {
+                    show: {
+                        resource: [
+                            'linkedin',
+                        ],
+                        operation: [
+                            'scrapeProfilesFromSearch',
+                        ],
+                    },
+                },
+            },  
+            {
                 displayName: 'Category',
                 name: 'category',
                 type: 'options',
@@ -277,8 +304,24 @@ export class Browserflow implements INodeType {
                         operation: [
                             'scrapeProfilesFromSearch',
                         ],
+                        searchMethod: ["filters"],
+
                     },
                 },
+            },
+            {
+                displayName: 'Search URL',
+                name: 'searchUrl',
+                type: 'string',
+                default: "",
+                description: 'The full LinkedIn search URL to scrape from',
+                displayOptions: {
+                    show: {
+                        resource: ["linkedin"],
+                        operation: ["scrapeProfilesFromSearch"],
+                        searchMethod: ["url"]
+                    }
+                }
             },
             {
                 displayName: 'Search Term',
@@ -295,6 +338,43 @@ export class Browserflow implements INodeType {
                         operation: [
                             'scrapeProfilesFromSearch',
                         ],
+                        searchMethod: ["filters"],
+                    },
+                },
+            },
+            {
+                displayName: 'City',
+                name: 'city',
+                type: 'string',
+                default: '',
+                description: 'The city to filter the search results by',
+                displayOptions: {
+                    show: {
+                        resource: [
+                            'linkedin',
+                        ],
+                        operation: [
+                            'scrapeProfilesFromSearch',
+                        ],
+                        searchMethod: ["filters"],
+                    },
+                },
+            },
+            {
+                displayName: 'Country',
+                name: 'country',
+                type: 'string',
+                default: '',
+                description: 'The country to filter the search results by',
+                displayOptions: {
+                    show: {
+                        resource: [
+                            'linkedin',
+                        ],
+                        operation: [
+                            'scrapeProfilesFromSearch',
+                        ],
+                        searchMethod: ["filters"],
                     },
                 },
             },
@@ -333,40 +413,6 @@ export class Browserflow implements INodeType {
                 },
             },
             {
-                displayName: 'City',
-                name: 'city',
-                type: 'string',
-                default: '',
-                description: 'The city to filter the search results by',
-                displayOptions: {
-                    show: {
-                        resource: [
-                            'linkedin',
-                        ],
-                        operation: [
-                            'scrapeProfilesFromSearch',
-                        ],
-                    },
-                },
-            },
-            {
-                displayName: 'Country',
-                name: 'country',
-                type: 'string',
-                default: '',
-                description: 'The country to filter the search results by',
-                displayOptions: {
-                    show: {
-                        resource: [
-                            'linkedin',
-                        ],
-                        operation: [
-                            'scrapeProfilesFromSearch',
-                        ],
-                    },
-                },
-            },
-            {
                 displayName: 'Scrape Profiles From Search',
                 name: 'scrapeProfilesFromSearch',
                 type: 'hidden',
@@ -388,6 +434,7 @@ export class Browserflow implements INodeType {
                         body: {
                             category: '={{$parameter["category"]}}',
                             searchTerm: '={{$parameter["searchTerm"]}}',
+                            searchUrl: '={{$parameter["searchUrl"]}}',
                             startPage: '={{$parameter["startPage"]}}',
                             nrOfPages: '={{$parameter["nrOfPages"]}}',
                             city: '={{$parameter["city"]}}',

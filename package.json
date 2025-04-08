@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-browserflow",
-  "version": "0.1.19",
+  "version": "0.1.33",
   "description": "Browserflow for LinkedIn is a toolkit for automating actions in LinkedIn. It allows you to automate actions like sending connection requests, sending messages, and more.",
   "keywords": [
     "n8n-community-node-package",
@@ -56,8 +56,5 @@
   },
   "peerDependencies": {
     "n8n-workflow": "*"
-  },
-  "dependencies": {
-    "sqlite3": "^5.1.7"
   }
 }
