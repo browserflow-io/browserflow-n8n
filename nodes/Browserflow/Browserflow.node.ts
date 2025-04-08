@@ -268,7 +268,7 @@ export class Browserflow implements INodeType {
                     },
                 ],
                 default: 'filters',
-                description: 'Choose how to perform the LinkedIn search - Recommended to use filters unless you need complex search criteria',
+                description: 'Choose how to perform the LinkedIn search - You can either use filters or provide a search URL. To find the search URL set the preferred filters in LinkedIn and copy the URL from the address bar. The URL will look like this: https://www.linkedin.com/search/results/people/?keywords=your%20search%20term&origin=GLOBAL_SEARCH_HEADER&sid=yourSid',
                 displayOptions: {
                     show: {
                         resource: [
