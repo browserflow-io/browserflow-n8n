@@ -242,12 +242,41 @@ export class Browserflow implements INodeType {
                         ],
                     },
                 },
+                
                 routing: {
                     request: {
                         method: 'POST',
                         url: '/linkedin-get-chat-history',
                         body: {
                             linkedinUrl: '={{$value}}',
+                        },
+                        json: true,
+                    },
+                },
+            },
+            {
+                displayName: 'Number of Messages',
+                name: 'nrOfMessages',
+                type: 'number',
+                default: '', 
+                description: 'Specify the number of messages to retrieve from the chat history. If left blank, the all messages will be retrieved.',
+                displayOptions: {
+                    show: {
+                        resource: [
+                            'linkedin',
+                        ],
+                        operation: [
+                            'getChatHistory',
+                        ],
+                    },
+                },
+                routing: {
+                    request: {
+                        method: 'POST',
+                        url: '/linkedin-get-chat-history',
+                        body: {
+                            linkedinUrl: '={{$parameter["linkedinUrl"]}}',
+                            nrOfMessages: '={{$parameter["nrOfMessages"]}}',
                         },
                         json: true,
                     },
