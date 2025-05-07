@@ -259,7 +259,7 @@ export class Browserflow implements INodeType {
                 name: 'nrOfMessages',
                 type: 'number',
                 default: '', 
-                description: 'Specify the number of messages to retrieve from the chat history. If left blank, the all messages will be retrieved.',
+                description: 'Specify the number of messages to retrieve from the chat history. If left blank, all messages will be retrieved.',
                 displayOptions: {
                     show: {
                         resource: [
