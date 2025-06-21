@@ -63,6 +63,11 @@ export class Browserflow implements INodeType {
                         action: 'Get data from a linkedin profile',
                     },
                     {
+                        name: 'List LinkedIn Connections',
+                        value: 'listConnections',
+                        action: 'Lists your linkedin connections',
+                    },
+                    {
                         name: 'Scrape Profiles From A LinkedIn Post',
                         value: 'scrapeProfilesFromPostComments',
                         action: 'Scrape profiles from a linked in post',
@@ -632,6 +637,104 @@ export class Browserflow implements INodeType {
                             add_reactions: '={{$parameter["addReactions"]}}',
                             reactions_offset: '={{$parameter["reactionsOffset"]}}',
                             reactions_limit: '={{$parameter["reactionsLimit"]}}',
+                        },
+                        json: true,
+                    },
+                },
+            },
+            {
+                displayName: 'Limit',
+                name: 'limit',
+                type: 'number',
+                default: 50,
+                typeOptions: {
+                    minValue: 1,
+                },
+                description: 'Max number of results to return',
+                displayOptions: {
+                    show: {
+                        resource: [
+                            'linkedin',
+                        ],
+                        operation: [
+                            'listConnections',
+                        ],
+                    },
+                },
+            },
+            {
+                displayName: 'Offset',
+                name: 'offset',
+                type: 'number',
+                default: 0,
+                description: 'The number of connections to skip before starting to scrape',
+                displayOptions: {
+                    show: {
+                        resource: [
+                            'linkedin',
+                        ],
+                        operation: [
+                            'listConnections',
+                        ],
+                    },
+                },
+            },
+            {
+                displayName: 'Filter',
+                name: 'filter',
+                type: 'options',
+                options: [
+                    {
+                        name: 'Recently Added',
+                        value: 'recently added',
+                    },
+                    {
+                        name: 'First Name',
+                        value: 'first name',
+                    },
+                    {
+                        name: 'Last Name',
+                        value: 'last name',
+                    },
+
+                ],
+                default: 'recently added',
+                description: 'The sort filter to apply to the connections list',
+                displayOptions: {
+                    show: {
+                        resource: [
+                            'linkedin',
+                        ],
+                        operation: [
+                            'listConnections',
+                        ],
+                    },
+                },
+            },  
+
+            {
+                displayName: 'List LinkedIn Connections',
+                name: 'listConnections',
+                type: 'hidden',
+                default: {},
+                displayOptions: {
+                    show: {
+                        resource: [
+                            'linkedin',
+                        ],
+                        operation: [
+                            'listConnections',
+                        ],
+                    },
+                },
+                routing: {
+                    request: {
+                        method: 'POST',
+                        url: '/linkedin-list-connections',
+                        body: {
+                            limit: '={{$parameter["limit"]}}',
+                            offset: '={{$parameter["offset"]}}',
+                            filter: '={{$parameter["filter"]}}',
                         },
                         json: true,
                     },
