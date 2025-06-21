@@ -65,7 +65,7 @@ export class Browserflow implements INodeType {
                     {
                         name: 'List LinkedIn Connections',
                         value: 'listConnections',
-                        action: 'Lists your linkedin connections',
+                        action: 'List your linkedin connections',
                     },
                     {
                         name: 'Scrape Profiles From A LinkedIn Post',
