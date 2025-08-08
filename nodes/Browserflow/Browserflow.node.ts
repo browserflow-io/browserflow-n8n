@@ -808,7 +808,7 @@ export class Browserflow implements INodeType {
                         body: {
                             limit: '={{$parameter["limit"]}}',
                             offset: '={{$parameter["offset"]}}',
-                            filter: '={{$parameter["linkedinUrl"]}}',
+                            linkedinUrl: '={{$value}}',
                         },
                         json: true,
                     },
