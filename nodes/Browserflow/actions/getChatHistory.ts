@@ -1,0 +1,53 @@
+import type { INodeProperties } from 'n8n-workflow';
+
+export const getChatHistoryFields: INodeProperties[] = [
+  {
+    displayName: 'LinkedIn URL',
+    name: 'linkedinUrl',
+    type: 'string',
+    default: '',
+    required: true,
+    description: 'The LinkedIn profile URL to get chat history',
+    displayOptions: {
+      show: {
+        resource: ['linkedin'],
+        operation: ['getChatHistory'],
+      },
+    },
+    routing: {
+      request: {
+        method: 'POST',
+        url: '/linkedin-get-chat-history',
+        body: {
+          linkedinUrl: '={{$value}}',
+        },
+        json: true,
+      },
+    },
+  },
+  {
+    displayName: 'Number of Messages',
+    name: 'nrOfMessages',
+    type: 'number',
+    default: '',
+    description:
+      'Specify the number of messages to retrieve from the chat history. If left blank, all messages will be retrieved.',
+    displayOptions: {
+      show: {
+        resource: ['linkedin'],
+        operation: ['getChatHistory'],
+      },
+    },
+    routing: {
+      request: {
+        method: 'POST',
+        url: '/linkedin-get-chat-history',
+        body: {
+          linkedinUrl: '={{$parameter["linkedinUrl"]}}',
+          nrOfMessages: '={{$parameter["nrOfMessages"]}}',
+        },
+        json: true,
+      },
+    },
+  },
+];
