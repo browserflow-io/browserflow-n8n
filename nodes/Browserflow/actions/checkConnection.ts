@@ -1,4 +1,10 @@
-import type { INodeProperties } from 'n8n-workflow';
+// actions/checkConnection.ts
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const checkConnectionFields: INodeProperties[] = [
   {
@@ -14,15 +20,15 @@ export const checkConnectionFields: INodeProperties[] = [
         operation: ['checkConnection'],
       },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-check-connection-status',
         body: {
           linkedinUrl: '={{$value}}',
         },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting), // cast to satisfy older typings
   },
 ];

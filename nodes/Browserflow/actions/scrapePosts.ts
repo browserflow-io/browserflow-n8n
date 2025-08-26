@@ -1,4 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const scrapePostsFields: INodeProperties[] = [
   {
@@ -9,10 +14,7 @@ export const scrapePostsFields: INodeProperties[] = [
     typeOptions: { minValue: 1 },
     description: 'Max number of results to return',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapePosts'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapePosts'] },
     },
   },
   {
@@ -22,10 +24,7 @@ export const scrapePostsFields: INodeProperties[] = [
     default: 0,
     description: 'The number of connections to skip before starting to scrape',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapePosts'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapePosts'] },
     },
   },
   {
@@ -37,14 +36,11 @@ export const scrapePostsFields: INodeProperties[] = [
     description:
       'The LinkedIn profile URL to scrape posts from, works for both person and company profiles',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapePosts'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapePosts'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-scrape-posts',
         body: {
           limit: '={{$parameter["limit"]}}',
@@ -53,6 +49,6 @@ export const scrapePostsFields: INodeProperties[] = [
         },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
 ];

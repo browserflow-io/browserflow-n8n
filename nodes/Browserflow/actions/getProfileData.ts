@@ -1,4 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const getProfileDataFields: INodeProperties[] = [
   {
@@ -9,20 +14,15 @@ export const getProfileDataFields: INodeProperties[] = [
     required: true,
     description: 'The LinkedIn profile URL to get profile data',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['getProfileData'],
-      },
+      show: { resource: ['linkedin'], operation: ['getProfileData'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-profile-data',
-        body: {
-          linkedinUrl: '={{$value}}',
-        },
+        body: { linkedinUrl: '={{$value}}' },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
 ];

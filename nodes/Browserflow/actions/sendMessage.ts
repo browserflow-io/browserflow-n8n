@@ -1,4 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const sendMessageFields: INodeProperties[] = [
   {
@@ -9,21 +14,16 @@ export const sendMessageFields: INodeProperties[] = [
     required: true,
     description: 'The LinkedIn profile URL to send a message',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['sendMessage'],
-      },
+      show: { resource: ['linkedin'], operation: ['sendMessage'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-send-message',
-        body: {
-          linkedinUrl: '={{$value}}',
-        },
+        body: { linkedinUrl: '={{$value}}' },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
   {
     displayName: 'Message',
@@ -34,14 +34,11 @@ export const sendMessageFields: INodeProperties[] = [
     description:
       "The message to send. Ensure it fits within LinkedIn's character and message limits.",
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['sendMessage'],
-      },
+      show: { resource: ['linkedin'], operation: ['sendMessage'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-send-message',
         body: {
           linkedinUrl: '={{$parameter["linkedinUrl"]}}',
@@ -49,6 +46,6 @@ export const sendMessageFields: INodeProperties[] = [
         },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
 ];

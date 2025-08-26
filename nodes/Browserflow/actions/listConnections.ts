@@ -1,4 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const listConnectionsFields: INodeProperties[] = [
   {
@@ -9,10 +14,7 @@ export const listConnectionsFields: INodeProperties[] = [
     typeOptions: { minValue: 1 },
     description: 'Max number of results to return',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['listConnections'],
-      },
+      show: { resource: ['linkedin'], operation: ['listConnections'] },
     },
   },
   {
@@ -22,10 +24,7 @@ export const listConnectionsFields: INodeProperties[] = [
     default: 0,
     description: 'The number of connections to skip before starting to scrape',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['listConnections'],
-      },
+      show: { resource: ['linkedin'], operation: ['listConnections'] },
     },
   },
   {
@@ -40,27 +39,21 @@ export const listConnectionsFields: INodeProperties[] = [
     default: 'recently added',
     description: 'The sort filter to apply to the connections list',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['listConnections'],
-      },
+      show: { resource: ['linkedin'], operation: ['listConnections'] },
     },
   },
-  // Hidden property to carry the request/routing for the operation
+  // Hidden request carrier
   {
     displayName: 'List LinkedIn Connections',
     name: 'listConnections',
     type: 'hidden',
     default: {},
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['listConnections'],
-      },
+      show: { resource: ['linkedin'], operation: ['listConnections'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-list-connections',
         body: {
           limit: '={{$parameter["limit"]}}',
@@ -69,6 +62,6 @@ export const listConnectionsFields: INodeProperties[] = [
         },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
 ];

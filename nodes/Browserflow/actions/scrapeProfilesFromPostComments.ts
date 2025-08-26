@@ -1,4 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const scrapeProfilesFromPostCommentsFields: INodeProperties[] = [
   {
@@ -9,10 +14,7 @@ export const scrapeProfilesFromPostCommentsFields: INodeProperties[] = [
     required: true,
     description: 'The URL of the LinkedIn post to scrape profiles from',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapeProfilesFromPostComments'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromPostComments'] },
     },
   },
   {
@@ -22,10 +24,7 @@ export const scrapeProfilesFromPostCommentsFields: INodeProperties[] = [
     default: false,
     description: 'Whether to include comments in the scrape results',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapeProfilesFromPostComments'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromPostComments'] },
     },
   },
   {
@@ -63,10 +62,7 @@ export const scrapeProfilesFromPostCommentsFields: INodeProperties[] = [
     default: false,
     description: 'Whether to include reactions in the scrape results',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapeProfilesFromPostComments'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromPostComments'] },
     },
   },
   {
@@ -97,21 +93,18 @@ export const scrapeProfilesFromPostCommentsFields: INodeProperties[] = [
       },
     },
   },
-  // Hidden property with the routing for the POST call
+  // Hidden request carrier
   {
     displayName: 'Scrape Profiles From Post Comments',
     name: 'scrapeProfilesFromPostComments',
     type: 'hidden',
     default: {},
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapeProfilesFromPostComments'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromPostComments'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-scrape-profiles-from-post-comments',
         body: {
           postUrl: '={{$parameter["postUrl"]}}',
@@ -124,6 +117,6 @@ export const scrapeProfilesFromPostCommentsFields: INodeProperties[] = [
         },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
 ];

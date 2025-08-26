@@ -1,4 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const getChatHistoryFields: INodeProperties[] = [
   {
@@ -9,21 +14,16 @@ export const getChatHistoryFields: INodeProperties[] = [
     required: true,
     description: 'The LinkedIn profile URL to get chat history',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['getChatHistory'],
-      },
+      show: { resource: ['linkedin'], operation: ['getChatHistory'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-get-chat-history',
-        body: {
-          linkedinUrl: '={{$value}}',
-        },
+        body: { linkedinUrl: '={{$value}}' },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
   {
     displayName: 'Number of Messages',
@@ -33,14 +33,11 @@ export const getChatHistoryFields: INodeProperties[] = [
     description:
       'Specify the number of messages to retrieve from the chat history. If left blank, all messages will be retrieved.',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['getChatHistory'],
-      },
+      show: { resource: ['linkedin'], operation: ['getChatHistory'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-get-chat-history',
         body: {
           linkedinUrl: '={{$parameter["linkedinUrl"]}}',
@@ -48,6 +45,6 @@ export const getChatHistoryFields: INodeProperties[] = [
         },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
 ];

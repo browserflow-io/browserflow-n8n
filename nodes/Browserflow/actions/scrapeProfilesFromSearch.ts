@@ -1,4 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const scrapeProfilesFromSearchFields: INodeProperties[] = [
   {
@@ -13,10 +18,7 @@ export const scrapeProfilesFromSearchFields: INodeProperties[] = [
     description:
       'Choose how to perform the LinkedIn search - You can either use filters or provide a search URL. To find the search URL set the preferred filters in LinkedIn and copy the URL from the address bar. The URL will look like this: https://www.linkedin.com/search/results/people/?keywords=your%20search%20term&origin=GLOBAL_SEARCH_HEADER&sid=yourSid',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapeProfilesFromSearch'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromSearch'] },
     },
   },
   {
@@ -101,10 +103,7 @@ export const scrapeProfilesFromSearchFields: INodeProperties[] = [
     default: 1,
     description: 'The starting page to scrape (can be used for pagination)',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapeProfilesFromSearch'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromSearch'] },
     },
   },
   {
@@ -114,27 +113,21 @@ export const scrapeProfilesFromSearchFields: INodeProperties[] = [
     default: 1,
     description: 'The number of pages to scrape',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapeProfilesFromSearch'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromSearch'] },
     },
   },
-  // Hidden property to carry the POST request
+  // Hidden request carrier
   {
     displayName: 'Scrape Profiles From Search',
     name: 'scrapeProfilesFromSearch',
     type: 'hidden',
     default: {},
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['scrapeProfilesFromSearch'],
-      },
+      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromSearch'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-scrape-profiles-from-search',
         body: {
           category: '={{$parameter["category"]}}',
@@ -147,6 +140,6 @@ export const scrapeProfilesFromSearchFields: INodeProperties[] = [
         },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
 ];

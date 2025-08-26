@@ -1,4 +1,9 @@
-import type { INodeProperties } from 'n8n-workflow';
+import type {
+  INodeProperties,
+  IHttpRequestMethods,
+  INodePropertyRouting,
+} from 'n8n-workflow';
+import { withErrorSurfacing } from './shared';
 
 export const sendConnectionInviteFields: INodeProperties[] = [
   {
@@ -9,21 +14,16 @@ export const sendConnectionInviteFields: INodeProperties[] = [
     required: true,
     description: 'The LinkedIn profile URL to send a connection invite',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['sendConnectionInvite'],
-      },
+      show: { resource: ['linkedin'], operation: ['sendConnectionInvite'] },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-connection-invite',
-        body: {
-          linkedinUrl: '={{$value}}',
-        },
+        body: { linkedinUrl: '={{$value}}' },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
   {
     displayName: 'Add Message',
@@ -32,10 +32,7 @@ export const sendConnectionInviteFields: INodeProperties[] = [
     default: false,
     description: 'Whether to include a custom message in the connection invite',
     displayOptions: {
-      show: {
-        resource: ['linkedin'],
-        operation: ['sendConnectionInvite'],
-      },
+      show: { resource: ['linkedin'], operation: ['sendConnectionInvite'] },
     },
   },
   {
@@ -52,9 +49,9 @@ export const sendConnectionInviteFields: INodeProperties[] = [
         addMessage: [true],
       },
     },
-    routing: {
+    routing: withErrorSurfacing({
       request: {
-        method: 'POST',
+        method: 'POST' as IHttpRequestMethods,
         url: '/linkedin-connection-invite',
         body: {
           linkedinUrl: '={{$parameter["linkedinUrl"]}}',
@@ -62,6 +59,6 @@ export const sendConnectionInviteFields: INodeProperties[] = [
         },
         json: true,
       },
-    },
+    } as unknown as INodePropertyRouting),
   },
 ];
