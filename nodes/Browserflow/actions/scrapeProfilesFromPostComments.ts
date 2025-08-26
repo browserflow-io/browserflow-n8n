@@ -1,9 +1,4 @@
-import type {
-  INodeProperties,
-  IHttpRequestMethods,
-  INodePropertyRouting,
-} from 'n8n-workflow';
-import { withErrorSurfacing } from './shared';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const scrapeProfilesFromPostCommentsFields: INodeProperties[] = [
   {
@@ -92,31 +87,5 @@ export const scrapeProfilesFromPostCommentsFields: INodeProperties[] = [
         addReactions: [true],
       },
     },
-  },
-  // Hidden request carrier
-  {
-    displayName: 'Scrape Profiles From Post Comments',
-    name: 'scrapeProfilesFromPostComments',
-    type: 'hidden',
-    default: {},
-    displayOptions: {
-      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromPostComments'] },
-    },
-    routing: withErrorSurfacing({
-      request: {
-        method: 'POST' as IHttpRequestMethods,
-        url: '/linkedin-scrape-profiles-from-post-comments',
-        body: {
-          postUrl: '={{$parameter["postUrl"]}}',
-          add_comments: '={{$parameter["addComments"]}}',
-          comments_offset: '={{$parameter["commentsOffset"]}}',
-          comments_limit: '={{$parameter["commentsLimit"]}}',
-          add_reactions: '={{$parameter["addReactions"]}}',
-          reactions_offset: '={{$parameter["reactionsOffset"]}}',
-          reactions_limit: '={{$parameter["reactionsLimit"]}}',
-        },
-        json: true,
-      },
-    } as unknown as INodePropertyRouting),
   },
 ];

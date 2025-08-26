@@ -1,9 +1,4 @@
-import type {
-  INodeProperties,
-  IHttpRequestMethods,
-  INodePropertyRouting,
-} from 'n8n-workflow';
-import { withErrorSurfacing } from './shared';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const scrapeProfilesFromSearchFields: INodeProperties[] = [
   {
@@ -16,7 +11,7 @@ export const scrapeProfilesFromSearchFields: INodeProperties[] = [
     ],
     default: 'filters',
     description:
-      'Choose how to perform the LinkedIn search - You can either use filters or provide a search URL. To find the search URL set the preferred filters in LinkedIn and copy the URL from the address bar. The URL will look like this: https://www.linkedin.com/search/results/people/?keywords=your%20search%20term&origin=GLOBAL_SEARCH_HEADER&sid=yourSid',
+      'Choose how to perform the LinkedIn search - You can either use filters or provide a search URL. To find the search URL set the preferred filters in LinkedIn and copy the URL from the address bar.',
     displayOptions: {
       show: { resource: ['linkedin'], operation: ['scrapeProfilesFromSearch'] },
     },
@@ -115,31 +110,5 @@ export const scrapeProfilesFromSearchFields: INodeProperties[] = [
     displayOptions: {
       show: { resource: ['linkedin'], operation: ['scrapeProfilesFromSearch'] },
     },
-  },
-  // Hidden request carrier
-  {
-    displayName: 'Scrape Profiles From Search',
-    name: 'scrapeProfilesFromSearch',
-    type: 'hidden',
-    default: {},
-    displayOptions: {
-      show: { resource: ['linkedin'], operation: ['scrapeProfilesFromSearch'] },
-    },
-    routing: withErrorSurfacing({
-      request: {
-        method: 'POST' as IHttpRequestMethods,
-        url: '/linkedin-scrape-profiles-from-search',
-        body: {
-          category: '={{$parameter["category"]}}',
-          searchTerm: '={{$parameter["searchTerm"]}}',
-          searchUrl: '={{$parameter["searchUrl"]}}',
-          startPage: '={{$parameter["startPage"]}}',
-          nrOfPages: '={{$parameter["nrOfPages"]}}',
-          city: '={{$parameter["city"]}}',
-          country: '={{$parameter["country"]}}',
-        },
-        json: true,
-      },
-    } as unknown as INodePropertyRouting),
   },
 ];

@@ -1,9 +1,4 @@
-import type {
-  INodeProperties,
-  IHttpRequestMethods,
-  INodePropertyRouting,
-} from 'n8n-workflow';
-import { withErrorSurfacing } from './shared';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const getChatHistoryFields: INodeProperties[] = [
   {
@@ -16,14 +11,6 @@ export const getChatHistoryFields: INodeProperties[] = [
     displayOptions: {
       show: { resource: ['linkedin'], operation: ['getChatHistory'] },
     },
-    routing: withErrorSurfacing({
-      request: {
-        method: 'POST' as IHttpRequestMethods,
-        url: '/linkedin-get-chat-history',
-        body: { linkedinUrl: '={{$value}}' },
-        json: true,
-      },
-    } as unknown as INodePropertyRouting),
   },
   {
     displayName: 'Number of Messages',
@@ -35,16 +22,5 @@ export const getChatHistoryFields: INodeProperties[] = [
     displayOptions: {
       show: { resource: ['linkedin'], operation: ['getChatHistory'] },
     },
-    routing: withErrorSurfacing({
-      request: {
-        method: 'POST' as IHttpRequestMethods,
-        url: '/linkedin-get-chat-history',
-        body: {
-          linkedinUrl: '={{$parameter["linkedinUrl"]}}',
-          nrOfMessages: '={{$parameter["nrOfMessages"]}}',
-        },
-        json: true,
-      },
-    } as unknown as INodePropertyRouting),
   },
 ];

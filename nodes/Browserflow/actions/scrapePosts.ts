@@ -1,9 +1,4 @@
-import type {
-  INodeProperties,
-  IHttpRequestMethods,
-  INodePropertyRouting,
-} from 'n8n-workflow';
-import { withErrorSurfacing } from './shared';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const scrapePostsFields: INodeProperties[] = [
   {
@@ -38,17 +33,5 @@ export const scrapePostsFields: INodeProperties[] = [
     displayOptions: {
       show: { resource: ['linkedin'], operation: ['scrapePosts'] },
     },
-    routing: withErrorSurfacing({
-      request: {
-        method: 'POST' as IHttpRequestMethods,
-        url: '/linkedin-scrape-posts',
-        body: {
-          limit: '={{$parameter["limit"]}}',
-          offset: '={{$parameter["offset"]}}',
-          linkedinUrl: '={{$value}}',
-        },
-        json: true,
-      },
-    } as unknown as INodePropertyRouting),
   },
 ];

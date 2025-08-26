@@ -1,9 +1,4 @@
-import type {
-  INodeProperties,
-  IHttpRequestMethods,
-  INodePropertyRouting,
-} from 'n8n-workflow';
-import { withErrorSurfacing } from './shared';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const listConnectionsFields: INodeProperties[] = [
   {
@@ -41,27 +36,5 @@ export const listConnectionsFields: INodeProperties[] = [
     displayOptions: {
       show: { resource: ['linkedin'], operation: ['listConnections'] },
     },
-  },
-  // Hidden request carrier
-  {
-    displayName: 'List LinkedIn Connections',
-    name: 'listConnections',
-    type: 'hidden',
-    default: {},
-    displayOptions: {
-      show: { resource: ['linkedin'], operation: ['listConnections'] },
-    },
-    routing: withErrorSurfacing({
-      request: {
-        method: 'POST' as IHttpRequestMethods,
-        url: '/linkedin-list-connections',
-        body: {
-          limit: '={{$parameter["limit"]}}',
-          offset: '={{$parameter["offset"]}}',
-          filter: '={{$parameter["filter"]}}',
-        },
-        json: true,
-      },
-    } as unknown as INodePropertyRouting),
   },
 ];

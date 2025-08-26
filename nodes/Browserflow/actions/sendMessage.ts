@@ -1,9 +1,4 @@
-import type {
-  INodeProperties,
-  IHttpRequestMethods,
-  INodePropertyRouting,
-} from 'n8n-workflow';
-import { withErrorSurfacing } from './shared';
+import type { INodeProperties } from 'n8n-workflow';
 
 export const sendMessageFields: INodeProperties[] = [
   {
@@ -16,14 +11,6 @@ export const sendMessageFields: INodeProperties[] = [
     displayOptions: {
       show: { resource: ['linkedin'], operation: ['sendMessage'] },
     },
-    routing: withErrorSurfacing({
-      request: {
-        method: 'POST' as IHttpRequestMethods,
-        url: '/linkedin-send-message',
-        body: { linkedinUrl: '={{$value}}' },
-        json: true,
-      },
-    } as unknown as INodePropertyRouting),
   },
   {
     displayName: 'Message',
@@ -36,16 +23,5 @@ export const sendMessageFields: INodeProperties[] = [
     displayOptions: {
       show: { resource: ['linkedin'], operation: ['sendMessage'] },
     },
-    routing: withErrorSurfacing({
-      request: {
-        method: 'POST' as IHttpRequestMethods,
-        url: '/linkedin-send-message',
-        body: {
-          linkedinUrl: '={{$parameter["linkedinUrl"]}}',
-          message: '={{$value}}',
-        },
-        json: true,
-      },
-    } as unknown as INodePropertyRouting),
   },
 ];
