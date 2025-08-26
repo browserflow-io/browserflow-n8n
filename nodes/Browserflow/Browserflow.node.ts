@@ -37,9 +37,14 @@ export class Browserflow implements INodeType {
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
     description: 'Automate LinkedIn with Browserflow',
     defaults: { name: 'Browserflow' },
+
+    // 👉 Two outputs: main (Data) + main (Error)
     inputs: ['main'] as NodeConnectionType[],
-    outputs: ['main'] as NodeConnectionType[],
+    outputs: ['main', 'main'] as NodeConnectionType[],
+    outputNames: ['Succes', 'Error'],
+
     credentials: [{ name: 'browserflowApi', required: true }],
+
     // requestDefaults are ignored by programmatic httpRequest but safe to keep
     requestDefaults: {
       baseURL: BASE_URL,
@@ -48,9 +53,11 @@ export class Browserflow implements INodeType {
         'Content-Type': 'application/json',
       },
     },
+
     properties: [
       RESOURCE,
       OPERATION,
+      // ---- Operations field groups ----
       ...checkConnectionFields,
       ...getProfileDataFields,
       ...getChatHistoryFields,
@@ -60,25 +67,40 @@ export class Browserflow implements INodeType {
       ...scrapeProfilesFromSearchFields,
       ...scrapeProfilesFromPostCommentsFields,
       ...scrapePostsFields,
+      // (intentionally no timeout property per user request)
     ],
   };
 
   async execute(this: IExecuteFunctions) {
     const items = this.getInputData();
-    const out: IDataObject[] = [];
+
+    // Output buffers in the same order as description.outputs
+    const outMain: INodeExecutionData[] = [];
+    const outError: INodeExecutionData[] = [];
 
     // 🔐 Read API key directly and add Authorization header explicitly
     const creds = (await this.getCredentials('browserflowApi')) as { apiKey: string };
     const authHeaders = { Authorization: `Bearer ${creds.apiKey}` };
-    const commonHeaders = { Accept: 'application/json', 'Content-Type': 'application/json', ...authHeaders };
+    const baseHeaders = { Accept: 'application/json', 'Content-Type': 'application/json' };
+
+    // Normalize any response to an object
+    const wrapJson = (res: unknown): IDataObject => {
+      if (res && typeof res === 'object' && !Array.isArray(res)) {
+        return res as IDataObject;
+      }
+      return { data: res as any };
+    };
 
     for (let i = 0; i < items.length; i++) {
       const resource = this.getNodeParameter('resource', i) as string;
       const operation = this.getNodeParameter('operation', i) as string;
 
+      // Headers per item
+      const commonHeaders = { ...baseHeaders, ...authHeaders };
+
       try {
         if (resource !== 'linkedin') {
-          out.push({ success: true });
+          outMain.push({ json: { success: true } });
           continue;
         }
 
@@ -92,7 +114,7 @@ export class Browserflow implements INodeType {
               json: true,
               body: { linkedinUrl },
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
@@ -105,7 +127,7 @@ export class Browserflow implements INodeType {
               json: true,
               body: { linkedinUrl },
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
@@ -123,7 +145,7 @@ export class Browserflow implements INodeType {
               json: true,
               body,
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
@@ -142,7 +164,7 @@ export class Browserflow implements INodeType {
               json: true,
               body,
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
@@ -156,14 +178,14 @@ export class Browserflow implements INodeType {
               json: true,
               body: { linkedinUrl, message },
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
           case 'listConnections': {
             const limit = this.getNodeParameter('limit', i) as number;
             const offset = this.getNodeParameter('offset', i) as number;
-            const filter = this.getNodeParameter('filter', i) as string;
+            const filter = this.getNodeParameter('filter', i, '') as string;
             const res = await this.helpers.httpRequest.call(this, {
               method: 'POST',
               url: `${BASE_URL}linkedin-list-connections`,
@@ -171,13 +193,12 @@ export class Browserflow implements INodeType {
               json: true,
               body: { limit, offset, filter },
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
           case 'scrapeProfilesFromSearch': {
             const searchMethod = this.getNodeParameter('searchMethod', i) as string;
-
             const body: IDataObject = {
               category: this.getNodeParameter('category', i, null) as string | null,
               searchTerm: this.getNodeParameter('searchTerm', i, '') as string,
@@ -202,7 +223,7 @@ export class Browserflow implements INodeType {
               json: true,
               body,
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
@@ -230,7 +251,7 @@ export class Browserflow implements INodeType {
                 reactions_limit: reactionsLimit,
               },
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
@@ -246,15 +267,17 @@ export class Browserflow implements INodeType {
               json: true,
               body: { limit, offset, linkedinUrl },
             });
-            out.push(res as IDataObject);
+            outMain.push({ json: wrapJson(res) });
             break;
           }
 
-          default:
-            out.push({});
+          default: {
+            outMain.push({ json: {} });
+          }
         }
       } catch (err) {
-        // -------- Custom banner + gray message, preserve full details --------
+        // -------- Per-item error handling --------
+        // Build the same status/apiMsg you used before:
         const statusRaw =
           (err as any)?.response?.statusCode ??
           (err as any)?.response?.status ??
@@ -264,9 +287,7 @@ export class Browserflow implements INodeType {
           (err as any)?.cause?.response?.statusCode ??
           (err as any)?.cause?.statusCode;
 
-        const status = typeof statusRaw === 'number'
-          ? statusRaw
-          : Number(statusRaw) || 'unknown';
+        const status = typeof statusRaw === 'number' ? statusRaw : Number(statusRaw) || 'unknown';
 
         const body = (err as any)?.response?.body || (err as any)?.response?.data;
         const apiMsg =
@@ -274,6 +295,20 @@ export class Browserflow implements INodeType {
           (err as any)?.message ||
           'Unknown error';
 
+        if (this.continueOnFail()) {
+          // Route error to the 2nd output
+          outError.push({
+            json: {
+              itemIndex: i,
+              status,
+              message: 'Request failed',
+              detail: String(apiMsg),
+            },
+          });
+          continue; // go on to next item
+        }
+
+        // Hard fail with your custom banner + gray one-liner
         throw new NodeApiError(this.getNode(), err as JsonObject, {
           message: `An error with status ${status} occured`, // red banner
           description: String(apiMsg),                       // gray one-liner
@@ -281,7 +316,7 @@ export class Browserflow implements INodeType {
       }
     }
 
-    const outItems = this.helpers.returnJsonArray(out) as INodeExecutionData[];
-    return [outItems];
+    // 👉 Return in the same order as outputs are declared
+    return [outMain, outError];
   }
 }
