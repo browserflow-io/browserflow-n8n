@@ -23,6 +23,7 @@ import {
   scrapeProfilesFromSearchFields,
   scrapeProfilesFromPostCommentsFields,
   scrapePostsFields,
+  inviteToFollowPage
 } from './actions';
 
 const BASE_URL = 'https://app.browserflow.io/api/';
@@ -60,6 +61,7 @@ export class Browserflow implements INodeType {
       ...scrapeProfilesFromSearchFields,
       ...scrapeProfilesFromPostCommentsFields,
       ...scrapePostsFields,
+      ...inviteToFollowPage
     ],
   };
 
@@ -249,7 +251,51 @@ export class Browserflow implements INodeType {
             out.push(res as IDataObject);
             break;
           }
+          case 'inviteToFollowPage': {
+            const linkedinUrl = this.getNodeParameter('linkedinUrl', i) as string;
+            const maxToInvite = this.getNodeParameter('maxToInvite', i, 10) as number;
+            const searchMethod = this.getNodeParameter('searchMethod', i) as 'term' | 'filters';
 
+            // Helper: accept string | string[] | undefined -> string[]
+            const toArray = (v: unknown): string[] => {
+              if (v == null) return [];
+              if (Array.isArray(v)) return v.filter(Boolean) as string[];
+              if (typeof v === 'string') return v.trim() ? [v.trim()] : [];
+              return [];
+            };
+
+            // searchTerm only when using 'term'
+            const searchTerm =
+              searchMethod === 'term'
+                ? (this.getNodeParameter('searchTerm', i, '') as string)
+                : '';
+
+            // Grab nested fields from the collection using dot notation
+            const locations       = toArray(this.getNodeParameter('filters.locations', i, []));
+            const schools         = toArray(this.getNodeParameter('filters.schools', i, []));
+            const currentCompany  = toArray(this.getNodeParameter('filters.currentCompany', i, []));
+            const industries      = toArray(this.getNodeParameter('filters.industries', i, []));
+
+            const res = await this.helpers.httpRequest.call(this, {
+              method: 'POST',
+              url: `${BASE_URL}linkedin-invite-to-follow-page`,
+              headers: commonHeaders,
+              json: true,
+              body: {
+                linkedinUrl,
+                maxToInvite,
+                searchTerm,
+                // always arrays from here on out
+                locations,
+                schools,
+                currentCompany,
+                industries,
+              },
+            });
+
+            out.push(res as IDataObject);
+            break;
+          }
           default:
             out.push({});
         }

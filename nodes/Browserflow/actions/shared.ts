@@ -19,6 +19,7 @@ export const OPERATION: INodeProperties = {
     { name: 'Check if a Person Is a Connection', value: 'checkConnection', action: 'Check if a person is a connection' },
     { name: 'Export LinkedIn Chat History', value: 'getChatHistory', action: 'Export linked in chat history' },
     { name: 'Get Data From A Linkedin Profile', value: 'getProfileData', action: 'Get data from a linkedin profile' },
+    { name: 'Invite Connections to Follow a LinkedIn Page', value: 'inviteToFollowPage', action: 'Invite connections to follow a linkedin page' },
     { name: 'List LinkedIn Connections', value: 'listConnections', action: 'List your linkedin connections' },
     { name: 'Scrape LinkedIn Posts', value: 'scrapePosts', action: 'Scrape linkedin posts' },
     { name: 'Scrape Profiles From A LinkedIn Post', value: 'scrapeProfilesFromPostComments', action: 'Scrape profiles from a linkedin post' },
