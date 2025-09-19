@@ -310,6 +310,7 @@ export class Browserflow implements INodeType {
           (err as any)?.cause?.response?.statusCode ??
           (err as any)?.cause?.statusCode;
 
+        const statusNum = typeof statusRaw === 'number' ? statusRaw : Number(statusRaw);
         const status = typeof statusRaw === 'number'
           ? statusRaw
           : Number(statusRaw) || 'unknown';
@@ -319,6 +320,20 @@ export class Browserflow implements INodeType {
           (body && (body.error || body.exception || body.message || body?.error_message || body?.detail || (err as any).response?.statusMessage)) ||
           (err as any)?.message ||
           'Unknown error';
+
+         if (this.continueOnFail()) {
+          const original = (items[i]?.json ?? {}) as IDataObject;
+          out.push({
+            ...original,
+            error: {
+              message: `An error with status ${status} occured`,
+              description: String(apiMsg),
+              httpCode: Number.isFinite(statusNum) ? String(statusNum) : null,
+              body: body ?? null,
+            },
+          });
+          continue;
+        }  
 
         throw new NodeApiError(this.getNode(), err as JsonObject, {
           message: `An error with status ${status} occured`, // red banner
