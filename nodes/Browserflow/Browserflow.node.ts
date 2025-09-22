@@ -328,8 +328,9 @@ export class Browserflow implements INodeType {
             error: {
               message: `An error with status ${status} occured`,
               description: String(apiMsg),
+              success: false,
               httpCode: Number.isFinite(statusNum) ? String(statusNum) : null,
-              body: body ?? null,
+              // body: body ?? null,
             },
           });
           continue;
