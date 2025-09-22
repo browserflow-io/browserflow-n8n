@@ -322,19 +322,18 @@ export class Browserflow implements INodeType {
           'Unknown error';
 
          if (this.continueOnFail()) {
-          const original = (items[i]?.json ?? {}) as IDataObject;
           out.push({
-            ...original,
-            error: {
-              message: `An error with status ${status} occured`,
-              description: String(apiMsg),
-              success: false,
-              httpCode: Number.isFinite(statusNum) ? String(statusNum) : null,
-              // body: body ?? null,
-            },
-          });
-          continue;
-        }  
+          json: {
+            message: `An error with status ${status} occured`,
+            description: String(apiMsg),
+            success: false,
+            httpCode: Number.isFinite(statusNum) ? String(statusNum) : null,
+          },
+          error: err as JsonObject,         // <-- top-level error marks the item as failed
+          pairedItem: { item: i },          // <-- keeps index mapping in UI
+        });
+        continue;
+      }
 
         throw new NodeApiError(this.getNode(), err as JsonObject, {
           message: `An error with status ${status} occured`, // red banner
