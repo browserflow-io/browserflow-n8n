@@ -9,7 +9,7 @@ export const getJobResultFields: INodeProperties[] = [
     default: '',
     required: true,
     description:
-      'The job ID returned when you invoked an action with polling enabled. Example: 1201bfb7-1b5f-44fe-93c5-3e26931f451a',
+      'The job ID returned when you invoked an action with polling enabled. Example: 1201bfb7-1b5f-44fe-93c5-3e269316876851a.',
     displayOptions: { show: { resource: ['linkedin'], operation: ['getJobResult'] } },
   },
 ];

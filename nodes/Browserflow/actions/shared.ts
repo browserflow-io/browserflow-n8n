@@ -31,7 +31,7 @@ export const EXECUTION_OPTIONS: INodeProperties = {
       name: 'use_polling',
       type: 'boolean',
       default: false,
-      description: 'Run asynchronously and return a job id you can poll',
+      description: 'Whether to run the action in the background and return a job ID you can poll',
     },
     {
       displayName: 'Callback URL',
