@@ -10,6 +10,41 @@ export const RESOURCE: INodeProperties = {
   default: 'linkedin',
 };
 
+export const EXECUTION_OPTIONS: INodeProperties = {
+  displayName: 'Execution',
+  name: 'execution',
+  type: 'collection',
+  placeholder: 'Add option',
+  default: {},
+  // 👇 Hide this collection when operation is "getJobResult"
+  displayOptions: {
+    show: {
+      resource: ['linkedin'],
+    },
+    hide: {
+      operation: ['getJobResult'],
+    },
+  },
+  options: [
+    {
+      displayName: 'Use Polling',
+      name: 'use_polling',
+      type: 'boolean',
+      default: false,
+      description: 'Run asynchronously and return a job id you can poll',
+    },
+    {
+      displayName: 'Callback URL',
+      name: 'callback_url',
+      type: 'string',
+      default: '',
+      placeholder: 'https://example.com/webhooks/browserflow',
+      description: 'If provided, the server will POST the result here when done',
+      displayOptions: { show: { use_polling: [true] } },
+    },
+  ],
+};
+
 export const OPERATION: INodeProperties = {
   displayName: 'Operation',
   name: 'operation',
@@ -19,6 +54,7 @@ export const OPERATION: INodeProperties = {
     { name: 'Check if a Person Is a Connection', value: 'checkConnection', action: 'Check if a person is a connection' },
     { name: 'Export LinkedIn Chat History', value: 'getChatHistory', action: 'Export linked in chat history' },
     { name: 'Get Data From A Linkedin Profile', value: 'getProfileData', action: 'Get data from a linkedin profile' },
+    { name: 'Get Job Result', value: 'getJobResult', action: 'Get the result of a job' },
     { name: 'Invite Connections to Follow a LinkedIn Page', value: 'inviteToFollowPage', action: 'Invite connections to follow a linkedin page' },
     { name: 'List LinkedIn Connections', value: 'listConnections', action: 'List your linkedin connections' },
     { name: 'Scrape LinkedIn Posts', value: 'scrapePosts', action: 'Scrape linkedin posts' },

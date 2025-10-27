@@ -1,6 +1,6 @@
 import type { INodeProperties } from 'n8n-workflow';
 
-export const inviteToFollowPage: INodeProperties[] = [
+export const inviteToFollowPageFields: INodeProperties[] = [
   {
     displayName: 'LinkedIn URL',
     name: 'linkedinUrl',

@@ -13,7 +13,7 @@ import { NodeApiError } from 'n8n-workflow';
 import {
   RESOURCE,
   OPERATION,
-  // field groups (NO routing blocks in any action file)
+  EXECUTION_OPTIONS,
   checkConnectionFields,
   getProfileDataFields,
   getChatHistoryFields,
@@ -23,10 +23,62 @@ import {
   scrapeProfilesFromSearchFields,
   scrapeProfilesFromPostCommentsFields,
   scrapePostsFields,
-  inviteToFollowPage
+  inviteToFollowPageFields,
+  getJobResultFields,
 } from './actions';
 
 const BASE_URL = 'https://app.browserflow.io/api/';
+
+/** ---------- tiny helpers (free functions) ---------- */
+function buildBody(exec: IExecuteFunctions, i: number, base: IDataObject): IDataObject {
+  const usePolling = exec.getNodeParameter('execution.use_polling', i, false) as boolean;
+  const callbackUrl = exec.getNodeParameter('execution.callback_url', i, '') as string;
+
+  const body: IDataObject = { ...base };
+  if (usePolling) body.use_polling = true;
+  if (callbackUrl) body.callback_url = callbackUrl;
+  return body;
+}
+
+async function apiPost(
+  exec: IExecuteFunctions,
+  i: number,
+  path: string,
+  authHeaders: Record<string, string>,
+  baseBody: IDataObject,
+) {
+  const body = buildBody(exec, i, baseBody);
+  return exec.helpers.httpRequest.call(exec, {
+    method: 'POST',
+    url: `${BASE_URL}${path}`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...authHeaders,
+    },
+    json: true,
+    body,
+  });
+}
+
+// 👇 NEW: simple GET helper (no polling params merged)
+async function apiGet(
+  exec: IExecuteFunctions,
+  path: string,
+  authHeaders: Record<string, string>,
+) {
+  return exec.helpers.httpRequest.call(exec, {
+    method: 'GET',
+    url: `${BASE_URL}${path}`,
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      ...authHeaders,
+    },
+    json: true,
+  });
+}
+/** --------------------------------------------------- */
 
 export class Browserflow implements INodeType {
   description: INodeTypeDescription = {
@@ -41,7 +93,6 @@ export class Browserflow implements INodeType {
     inputs: ['main'] as NodeConnectionType[],
     outputs: ['main'] as NodeConnectionType[],
     credentials: [{ name: 'browserflowApi', required: true }],
-    // requestDefaults are ignored by programmatic httpRequest but safe to keep
     requestDefaults: {
       baseURL: BASE_URL,
       headers: {
@@ -52,6 +103,7 @@ export class Browserflow implements INodeType {
     properties: [
       RESOURCE,
       OPERATION,
+      EXECUTION_OPTIONS,
       ...checkConnectionFields,
       ...getProfileDataFields,
       ...getChatHistoryFields,
@@ -61,7 +113,8 @@ export class Browserflow implements INodeType {
       ...scrapeProfilesFromSearchFields,
       ...scrapeProfilesFromPostCommentsFields,
       ...scrapePostsFields,
-      ...inviteToFollowPage
+      ...inviteToFollowPageFields,
+      ...getJobResultFields,
     ],
   };
 
@@ -69,10 +122,16 @@ export class Browserflow implements INodeType {
     const items = this.getInputData();
     const out: IDataObject[] = [];
 
-    // 🔐 Read API key directly and add Authorization header explicitly
     const creds = (await this.getCredentials('browserflowApi')) as { apiKey: string };
     const authHeaders = { Authorization: `Bearer ${creds.apiKey}` };
     const commonHeaders = { Accept: 'application/json', 'Content-Type': 'application/json', ...authHeaders };
+
+    const toArray = (v: unknown): string[] => {
+      if (v == null) return [];
+      if (Array.isArray(v)) return v.filter(Boolean) as string[];
+      if (typeof v === 'string') return v.trim() ? [v.trim()] : [];
+      return [];
+    };
 
     for (let i = 0; i < items.length; i++) {
       const resource = this.getNodeParameter('resource', i) as string;
@@ -87,26 +146,14 @@ export class Browserflow implements INodeType {
         switch (operation) {
           case 'checkConnection': {
             const linkedinUrl = this.getNodeParameter('linkedinUrl', i) as string;
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-check-connection-status`,
-              headers: commonHeaders,
-              json: true,
-              body: { linkedinUrl },
-            });
+            const res = await apiPost(this, i, 'linkedin-check-connection-status', commonHeaders, { linkedinUrl });
             out.push(res as IDataObject);
             break;
           }
 
           case 'getProfileData': {
             const linkedinUrl = this.getNodeParameter('linkedinUrl', i) as string;
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-profile-data`,
-              headers: commonHeaders,
-              json: true,
-              body: { linkedinUrl },
-            });
+            const res = await apiPost(this, i, 'linkedin-profile-data', commonHeaders, { linkedinUrl });
             out.push(res as IDataObject);
             break;
           }
@@ -114,17 +161,11 @@ export class Browserflow implements INodeType {
           case 'getChatHistory': {
             const linkedinUrl = this.getNodeParameter('linkedinUrl', i) as string;
             const nrOfMessages = this.getNodeParameter('nrOfMessages', i, '') as string | number;
-            const body: IDataObject = { linkedinUrl };
+            const base: IDataObject = { linkedinUrl };
             if (nrOfMessages !== '' && nrOfMessages !== undefined && nrOfMessages !== null) {
-              body.nrOfMessages = nrOfMessages;
+              base.nrOfMessages = nrOfMessages;
             }
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-get-chat-history`,
-              headers: commonHeaders,
-              json: true,
-              body,
-            });
+            const res = await apiPost(this, i, 'linkedin-get-chat-history', commonHeaders, base);
             out.push(res as IDataObject);
             break;
           }
@@ -132,18 +173,12 @@ export class Browserflow implements INodeType {
           case 'sendConnectionInvite': {
             const linkedinUrl = this.getNodeParameter('linkedinUrl', i) as string;
             const addMessage = this.getNodeParameter('addMessage', i, false) as boolean;
-            const body: IDataObject = { linkedinUrl };
+            const base: IDataObject = { linkedinUrl };
             if (addMessage) {
               const message = this.getNodeParameter('message', i, '') as string;
-              if (message) body.message = message;
+              if (message) base.message = message;
             }
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-connection-invite`,
-              headers: commonHeaders,
-              json: true,
-              body,
-            });
+            const res = await apiPost(this, i, 'linkedin-connection-invite', commonHeaders, base);
             out.push(res as IDataObject);
             break;
           }
@@ -151,13 +186,7 @@ export class Browserflow implements INodeType {
           case 'sendMessage': {
             const linkedinUrl = this.getNodeParameter('linkedinUrl', i) as string;
             const message = this.getNodeParameter('message', i) as string;
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-send-message`,
-              headers: commonHeaders,
-              json: true,
-              body: { linkedinUrl, message },
-            });
+            const res = await apiPost(this, i, 'linkedin-send-message', commonHeaders, { linkedinUrl, message });
             out.push(res as IDataObject);
             break;
           }
@@ -166,13 +195,7 @@ export class Browserflow implements INodeType {
             const limit = this.getNodeParameter('limit', i) as number;
             const offset = this.getNodeParameter('offset', i) as number;
             const filter = this.getNodeParameter('filter', i) as string;
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-list-connections`,
-              headers: commonHeaders,
-              json: true,
-              body: { limit, offset, filter },
-            });
+            const res = await apiPost(this, i, 'linkedin-list-connections', commonHeaders, { limit, offset, filter });
             out.push(res as IDataObject);
             break;
           }
@@ -180,7 +203,7 @@ export class Browserflow implements INodeType {
           case 'scrapeProfilesFromSearch': {
             const searchMethod = this.getNodeParameter('searchMethod', i) as string;
 
-            const body: IDataObject = {
+            const base: IDataObject = {
               category: this.getNodeParameter('category', i, null) as string | null,
               searchTerm: this.getNodeParameter('searchTerm', i, '') as string,
               searchUrl: this.getNodeParameter('searchUrl', i, '') as string,
@@ -191,19 +214,13 @@ export class Browserflow implements INodeType {
             };
 
             if (searchMethod === 'url') {
-              delete body.category;
-              delete body.searchTerm;
-              delete body.city;
-              delete body.country;
+              delete base.category;
+              delete base.searchTerm;
+              delete base.city;
+              delete base.country;
             }
 
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-scrape-profiles-from-search`,
-              headers: commonHeaders,
-              json: true,
-              body,
-            });
+            const res = await apiPost(this, i, 'linkedin-scrape-profiles-from-search', commonHeaders, base);
             out.push(res as IDataObject);
             break;
           }
@@ -217,20 +234,14 @@ export class Browserflow implements INodeType {
             const reactionsOffset = this.getNodeParameter('reactionsOffset', i, 0) as number;
             const reactionsLimit = this.getNodeParameter('reactionsLimit', i, 10) as number;
 
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-scrape-profiles-from-post-comments`,
-              headers: commonHeaders,
-              json: true,
-              body: {
-                postUrl,
-                add_comments: addComments,
-                comments_offset: commentsOffset,
-                comments_limit: commentsLimit,
-                add_reactions: addReactions,
-                reactions_offset: reactionsOffset,
-                reactions_limit: reactionsLimit,
-              },
+            const res = await apiPost(this, i, 'linkedin-scrape-profiles-from-post-comments', commonHeaders, {
+              postUrl,
+              add_comments: addComments,
+              comments_offset: commentsOffset,
+              comments_limit: commentsLimit,
+              add_reactions: addReactions,
+              reactions_offset: reactionsOffset,
+              reactions_limit: reactionsLimit,
             });
             out.push(res as IDataObject);
             break;
@@ -241,66 +252,52 @@ export class Browserflow implements INodeType {
             const offset = this.getNodeParameter('offset', i) as number;
             const linkedinUrl = this.getNodeParameter('linkedinUrl', i) as string;
 
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-scrape-posts`,
-              headers: commonHeaders,
-              json: true,
-              body: { limit, offset, linkedinUrl },
-            });
+            const res = await apiPost(this, i, 'linkedin-scrape-posts', commonHeaders, { limit, offset, linkedinUrl });
             out.push(res as IDataObject);
             break;
           }
+
           case 'inviteToFollowPage': {
             const linkedinUrl = this.getNodeParameter('linkedinUrl', i) as string;
             const maxToInvite = this.getNodeParameter('maxToInvite', i, 10) as number;
             const searchMethod = this.getNodeParameter('searchMethod', i) as 'term' | 'filters';
 
-            // Helper: accept string | string[] | undefined -> string[]
-            const toArray = (v: unknown): string[] => {
-              if (v == null) return [];
-              if (Array.isArray(v)) return v.filter(Boolean) as string[];
-              if (typeof v === 'string') return v.trim() ? [v.trim()] : [];
-              return [];
-            };
-
-            // searchTerm only when using 'term'
             const searchTerm =
               searchMethod === 'term'
                 ? (this.getNodeParameter('searchTerm', i, '') as string)
                 : '';
 
-            // Grab nested fields from the collection using dot notation
-            const locations       = toArray(this.getNodeParameter('filters.locations', i, []));
-            const schools         = toArray(this.getNodeParameter('filters.schools', i, []));
-            const currentCompany  = toArray(this.getNodeParameter('filters.currentCompany', i, []));
-            const industries      = toArray(this.getNodeParameter('filters.industries', i, []));
+            const locations = toArray(this.getNodeParameter('filters.locations', i, []));
+            const schools = toArray(this.getNodeParameter('filters.schools', i, []));
+            const currentCompany = toArray(this.getNodeParameter('filters.currentCompany', i, []));
+            const industries = toArray(this.getNodeParameter('filters.industries', i, []));
 
-            const res = await this.helpers.httpRequest.call(this, {
-              method: 'POST',
-              url: `${BASE_URL}linkedin-invite-to-follow-page`,
-              headers: commonHeaders,
-              json: true,
-              body: {
-                linkedinUrl,
-                maxToInvite,
-                searchTerm,
-                // always arrays from here on out
-                locations,
-                schools,
-                currentCompany,
-                industries,
-              },
+            const res = await apiPost(this, i, 'linkedin-invite-to-follow-page', commonHeaders, {
+              linkedinUrl,
+              maxToInvite,
+              searchTerm,
+              locations,
+              schools,
+              currentCompany,
+              industries,
             });
 
             out.push(res as IDataObject);
             break;
           }
+
+          // 👇 NEW: fetch a job result by id
+          case 'getJobResult': {
+            const jobId = this.getNodeParameter('jobId', i) as string;
+            const res = await apiGet(this, `bot-jobs/${jobId}`, commonHeaders);
+            out.push(res as IDataObject);
+            break;
+          }
+
           default:
             out.push({});
         }
       } catch (err) {
-        // -------- Custom banner + gray message, preserve full details --------
         const statusRaw =
           (err as any)?.response?.statusCode ??
           (err as any)?.response?.status ??
@@ -311,9 +308,7 @@ export class Browserflow implements INodeType {
           (err as any)?.cause?.statusCode;
 
         const statusNum = typeof statusRaw === 'number' ? statusRaw : Number(statusRaw);
-        const status = typeof statusRaw === 'number'
-          ? statusRaw
-          : Number(statusRaw) || 'unknown';
+        const status = typeof statusRaw === 'number' ? statusRaw : Number(statusRaw) || 'unknown';
 
         const body = (err as any)?.response?.body || (err as any)?.response?.data;
         const apiMsg =
@@ -321,23 +316,23 @@ export class Browserflow implements INodeType {
           (err as any)?.message ||
           'Unknown error';
 
-         if (this.continueOnFail()) {
+        if (this.continueOnFail()) {
           out.push({
-          json: {
-            message: `An error with status ${status} occured`,
-            description: String(apiMsg),
-            success: false,
-            httpCode: Number.isFinite(statusNum) ? String(statusNum) : null,
-          },
-          error: err as JsonObject,         // <-- top-level error marks the item as failed
-          pairedItem: { item: i },          // <-- keeps index mapping in UI
-        });
-        continue;
-      }
+            json: {
+              message: `An error with status ${status} occured`,
+              description: String(apiMsg),
+              success: false,
+              httpCode: Number.isFinite(statusNum) ? String(statusNum) : null,
+            },
+            error: err as JsonObject,
+            pairedItem: { item: i },
+          });
+          continue;
+        }
 
         throw new NodeApiError(this.getNode(), err as JsonObject, {
-          message: `An error with status ${status} occured`, // red banner
-          description: String(apiMsg),                       // gray one-liner
+          message: `An error with status ${status} occured`,
+          description: String(apiMsg),
         });
       }
     }

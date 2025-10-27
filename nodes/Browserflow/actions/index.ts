@@ -8,4 +8,5 @@ export { listConnectionsFields } from './listConnections';
 export { scrapeProfilesFromSearchFields } from './scrapeProfilesFromSearch';
 export { scrapeProfilesFromPostCommentsFields } from './scrapeProfilesFromPostComments';
 export { scrapePostsFields } from './scrapePosts';
-export { inviteToFollowPage } from './inviteToFollowPage';
+export { inviteToFollowPageFields } from './inviteToFollowPage';
+export { getJobResultFields } from './getJobResult';
