@@ -27,7 +27,7 @@ export const EXECUTION_OPTIONS: INodeProperties = {
   },
   options: [
     {
-      displayName: 'Use Polling',
+      displayName: 'Schedule as a Job (Polling)',
       name: 'use_polling',
       type: 'boolean',
       default: false,
