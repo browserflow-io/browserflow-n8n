@@ -1,13 +1,24 @@
 {
   "name": "n8n-nodes-browserflow",
   "version": "1.0.2",
-  "description": "Browserflow for LinkedIn is a toolkit for automating actions in LinkedIn. It allows you to automate actions like sending connection requests, sending messages, and more.",
+  "description": "Browserflow for LinkedIn is a toolkit for automating actions in LinkedIn. Scrape profiles, send invites and messages, source leads and many more.",
   "keywords": [
     "n8n-community-node-package",
     "browserflow",
     "linkedin automation",
     "linkedin",
-    "n8n"
+    "n8n",
+    "automation",
+    "scraping",
+    "linkedin-scraper",
+    "profile-scraper",
+    "n8n-linkedin",
+    "linkedin-api",
+    "linkedin-data",
+    "api",
+    "sales",
+    "marketing",
+    "recruiting"
   ],
   "license": "MIT",
   "homepage": "https://browserflow.io/n8n",
