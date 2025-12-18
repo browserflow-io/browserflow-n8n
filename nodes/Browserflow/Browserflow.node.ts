@@ -88,7 +88,7 @@ export class Browserflow implements INodeType {
     group: ['transform'],
     version: 1,
     subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-    description: 'Automate LinkedIn with Browserflow',
+    description: 'Automate LinkedIn actions with Browserflow for LinkedIn',
     defaults: { name: 'Browserflow' },
     inputs: ['main'] as NodeConnectionType[],
     outputs: ['main'] as NodeConnectionType[],
