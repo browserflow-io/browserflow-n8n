@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-browserflow",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A toolkit for LinkedIn automation. Scrape profiles and posts, send connection invites and messages, source leads and more.",
   "keywords": [
     "n8n-community-node-package",
