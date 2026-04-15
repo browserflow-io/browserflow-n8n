@@ -51,10 +51,12 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
-      "dist/credentials/BrowserflowApi.credentials.js"
+      "dist/credentials/BrowserflowApi.credentials.js",
+      "dist/credentials/BrowserflowV2Api.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/Browserflow/Browserflow.node.js"
+      "dist/nodes/Browserflow/Browserflow.node.js",
+      "dist/nodes/BrowserflowV2/BrowserflowV2.node.js"
     ]
   },
   "devDependencies": {

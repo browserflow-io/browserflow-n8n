@@ -1,0 +1,20 @@
+{
+  "node": "n8n-nodes-base.BrowserflowV2",
+  "nodeVersion": "1.0",
+  "codexVersion": "1.0",
+  "categories": [
+    "Miscellaneous"
+  ],
+  "resources": {
+    "credentialDocumentation": [
+      {
+        "url": "https://docs.browserflow.io/api"
+      }
+    ],
+    "primaryDocumentation": [
+      {
+        "url": "https://docs.browserflow.io/api"
+      }
+    ]
+  }
+}
